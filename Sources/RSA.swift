@@ -27,42 +27,75 @@ import Foundation
 
 
 
-fileprivate extension Digest.Algorithm {
-    var nid: Int32 {
-        switch self {
-        case .md2:
-            return NID_md2
-        case .md4:
-            return NID_md4
-        case .md5:
-            return NID_md5
-        case .sha1:
-            return NID_sha1
-        case .sha224:
-            return NID_sha224
-        case .sha256:
-            return NID_sha256
-        case .sha384:
-            return NID_sha384
-        case .sha512:
-            return NID_sha512
-        }
-    }
-}
-
-
 ///
 /// RSA Handling: Implements a series of Class Level RSA Helper Functions.
 ///
 public class RSA {
     
-    private let algorithm: Digest.Algorithm
+    private let algorithm: Algorithm
     private let key: UnsafeMutablePointer<UInt8>
     private let keySize: Int32
 	
 	// MARK: Enums
 	
 //	#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+    
+    /// The RSA algorithm to use.
+    public enum Algorithm {
+        case md2
+        case md4
+        case md5
+        case sha1
+        case sha224
+        case sha256
+        case sha384
+        case sha512
+        
+        
+        /// OpenSSL equivalent.
+        var nid: Int32 {
+            switch self {
+            case .md2:
+                return NID_md2
+            case .md4:
+                return NID_md4
+            case .md5:
+                return NID_md5
+            case .sha1:
+                return NID_sha1
+            case .sha224:
+                return NID_sha224
+            case .sha256:
+                return NID_sha256
+            case .sha384:
+                return NID_sha384
+            case .sha512:
+                return NID_sha512
+            }
+        }
+        
+        /// `Digest` equivalent.
+        var digest: Digest.Algorithm {
+            switch self {
+            case .md2:
+                return .md2
+            case .md4:
+                return .md4
+            case .md5:
+                return .md5
+            case .sha1:
+                return .sha1
+            case .sha224:
+                return .sha224
+            case .sha256:
+                return .sha256
+            case .sha384:
+                return .sha384
+            case .sha512:
+                return .sha512
+            }
+        }
+    }
 
 		/// The RSA Algorithm to use.
 //		public enum RSAAlgorithm: Int {
@@ -93,18 +126,27 @@ public class RSA {
 //		}
 
     
-    public init(key: Data, algorithm: Digest.Algorithm) {
+    /// Initializes a new `RSA` instance for signing.
+    ///
+    /// - parameter key:       The RSA private key, in PEM format.
+    /// - parameter algorithm: The digest algorithm to use for signing.
+    public init(key: Data, algorithm: Algorithm) {
         self.algorithm = algorithm
         self.key = UnsafeMutablePointer<UInt8>.allocate(capacity: key.count)
         key.copyBytes(to: self.key, count: key.count)
         self.keySize = Int32(key.count)
     }
     
+    /// Signs the given data using the receiver's kay and digest algorithm.
+    ///
+    /// - parameter data: The data to sign.
+    ///
+    /// - returns: The signed data.
     public func sign(_ data: Data) -> Data? {
         // Generate hash
         let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: data.count)
         data.copyBytes(to: ptr, count: data.count)
-        guard let digest = Digest(using: algorithm).update(from: ptr, byteCount: data.count) else {
+        guard let digest = Digest(using: algorithm.digest).update(from: ptr, byteCount: data.count) else {
             return nil
         }
         var digestBytes = digest.final()
@@ -123,6 +165,12 @@ public class RSA {
         return Data(bytes: buffer, count: rsaSize)
     }
     
+    /// Signs the given string using the receiver's private key and digest algorithm.
+    ///
+    /// - parameter string:   The string to sign.
+    /// - parameter encoding: The string's encoding.
+    ///
+    /// - returns: The signed data.
     public func sign(_ string: String, encoding: String.Encoding = .utf8) -> Data? {
         guard let data: Data = string.data(using: encoding) else {
             return nil
