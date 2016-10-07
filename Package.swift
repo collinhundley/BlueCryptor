@@ -36,6 +36,7 @@ let package = Package(
 	targets: [Target(name: "Cryptor")],
 	dependencies: [
 		.Package(url: url, majorVersion: majorVersion, minor: minorVersion),
+		.Package(url: "https://github.com/IBM-Swift/OpenSSL-OSX.git", majorVersion: 0, minor: 3)
 	],
 	exclude: ["Cryptor.xcodeproj", "README.md", "Sources/Info.plist"]
 )
