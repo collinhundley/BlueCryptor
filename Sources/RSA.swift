@@ -130,13 +130,6 @@ public class RSA {
         return sign(data)
     }
     
-    public func sign(_ string: String, encoding: String.Encoding = .utf8) -> String? {
-        guard let data: Data = sign(string, encoding: encoding) else {
-            return nil
-        }
-        return String(data: data, encoding: encoding)
-    }
-    
     
 	
 //	#elseif os(Linux)
