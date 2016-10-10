@@ -20,23 +20,27 @@
 import PackageDescription
 
 #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-	let url = "https://github.com/IBM-Swift/CommonCrypto.git"
-	let majorVersion = 0
-	let minorVersion = 1
+let package = Package(
+    name: "Cryptor",
+    targets: [Target(name: "Cryptor")],
+    dependencies: [
+        .Package(url: "https://github.com/IBM-Swift/CommonCrypto.git", majorVersion: 0, minor: 1),
+        .Package(url: "https://github.com/IBM-Swift/OpenSSL-OSX.git", majorVersion: 0, minor: 3)
+    ],
+    exclude: ["Cryptor.xcodeproj", "README.md", "Sources/Info.plist"]
+)
 #elseif os(Linux)
 	let url = "https://github.com/IBM-Swift/OpenSSL.git"
 	let majorVersion = 0
 	let minorVersion = 2
+let package = Package(
+    name: "Cryptor",
+    targets: [Target(name: "Cryptor")],
+    dependencies: [
+        .Package(url: "https://github.com/IBM-Swift/OpenSSL.git", majorVersion: 0, minor: 2),
+    ],
+    exclude: ["Cryptor.xcodeproj", "README.md", "Sources/Info.plist"]
+)
 #else
 	fatalError("Unsupported OS")
 #endif
-
-let package = Package(
-	name: "Cryptor",
-	targets: [Target(name: "Cryptor")],
-	dependencies: [
-		.Package(url: url, majorVersion: majorVersion, minor: minorVersion),
-		.Package(url: "https://github.com/IBM-Swift/OpenSSL-OSX.git", majorVersion: 0, minor: 3)
-	],
-	exclude: ["Cryptor.xcodeproj", "README.md", "Sources/Info.plist"]
-)
